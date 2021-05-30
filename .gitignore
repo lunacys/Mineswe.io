@@ -1,0 +1,8 @@
+mineswee.io/node_modules
+coverage
+dist/*
+.cache
+.env
+.idea/*
+# Project exclude paths
+/mineswee.io/dist/
