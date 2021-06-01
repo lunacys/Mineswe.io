@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Mineswe.io.WebApi.Models;
 using Mineswe.io.WebApi.Services;
 
@@ -17,9 +18,9 @@ namespace Mineswe.io.WebApi.Controllers
 
         // POST
         [HttpPost("doAuth")]
-        public IActionResult DoAuth([FromForm] AuthRequest model)
+        public async Task<IActionResult> DoAuth([FromForm] AuthRequest model)
         {
-            var response = _userService.Authenticate(model);
+            var response = await _userService.AuthenticateAsync(model);
 
             if (response == null)
                 return BadRequest(new {message = "Invalid Username or Password"});
@@ -29,9 +30,9 @@ namespace Mineswe.io.WebApi.Controllers
 
         [Auth]
         [HttpGet("getAll")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var users = _userService.GetAll();
+            var users = await _userService.GetAllAsync();
             return Ok(users);
         }
     }

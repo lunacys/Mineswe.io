@@ -26,12 +26,12 @@ namespace Mineswe.io.WebApi
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                AddUserToContext(context, userService, token);
+                await AddUserToContext(context, userService, token);
 
             await _next(context);
         }
 
-        private void AddUserToContext(HttpContext context, IUserService userService, string token)
+        private async Task AddUserToContext(HttpContext context, IUserService userService, string token)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace Mineswe.io.WebApi
                 var jwtToken = (JwtSecurityToken) validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
-                context.Items["User"] = userService.GetById(userId);
+                context.Items["User"] = await userService.GetByIdAsync(userId);
             }
             catch (Exception e)
             {

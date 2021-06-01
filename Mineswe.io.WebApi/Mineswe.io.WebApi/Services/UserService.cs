@@ -4,40 +4,36 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Mineswe.io.WebApi.Data;
 using Mineswe.io.WebApi.Models;
 
 namespace Mineswe.io.WebApi.Services
 {
     public class UserService : IUserService
     {
-        // TODO: REMOVE SEEDED USERS!!!
-        private List<User> _seedUsers;
-
         private readonly AppSettings _appSettings;
         private readonly IPasswordHasherService _hasher;
+        private readonly MinesweioContext _dbContext;
 
-        public UserService(IOptions<AppSettings> appSettings, IPasswordHasherService hasher)
+        public UserService(IOptions<AppSettings> appSettings, IPasswordHasherService hasher, MinesweioContext dbContext)
         {
             _appSettings = appSettings.Value;
             _hasher = hasher;
-
-            _seedUsers = new List<User>
-            {
-                new User {Id = 1, Username = "SeedTest1", Email = "noemail@nodomain.com", PasswordHash = _hasher.Hash("masterkey") }
-            };
+            _dbContext = dbContext;
         }
 
-        public AuthResponse Authenticate(AuthRequest model)
+        public async Task<AuthResponse> AuthenticateAsync(AuthRequest model)
         {
-            // var hashed = _hasher.Hash(model.Password);
-
-            var user = _seedUsers.SingleOrDefault(x => 
-                x.Username == model.Username && 
-                _hasher.Check(x.PasswordHash, model.Password).Verified);
+            var user = await _dbContext.Users.Where(u => u.Username == model.Username).SingleOrDefaultAsync();
 
             if (user == null)
+                return null;
+
+            if (!_hasher.Check(user.PasswordHash, model.Password).Verified)
                 return null;
 
             var token = GenerateJwtToken(user);
@@ -45,14 +41,14 @@ namespace Mineswe.io.WebApi.Services
             return new AuthResponse(user, token);
         }
 
-        public IEnumerable<User> GetAll()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return _seedUsers;
+            return await _dbContext.Users.ToListAsync();
         }
 
-        public User GetById(int id)
+        public async Task<User> GetByIdAsync(int id)
         {
-            return _seedUsers.FirstOrDefault(x => x.Id == id);
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         private string GenerateJwtToken(User user)

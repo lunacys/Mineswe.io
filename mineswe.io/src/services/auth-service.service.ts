@@ -22,11 +22,21 @@ export class AuthServiceService {
 	}
 
 	public async auth(username: string, password: string): Promise<UserData> {
-  		const result = <UserData> <unknown> await this.http.post<UserData>(
-  			this.appConfig.Settings.connection.apiAuthUrl + "/doAuth",
-			this.createBody(username, password),
-			this._httpOptions
-        ).toPromise();
+  	    let result: UserData;
+
+  	    try {
+            result = <UserData> <unknown> await this.http.post<UserData>(
+                this.appConfig.Settings.connection.apiAuthUrl + "/doAuth",
+                this.createBody(username, password),
+                this._httpOptions
+            ).toPromise();
+        } catch (ex) {
+  	        if (ex && ex.error && ex.error.message) {
+  	            throw new Error(ex.error.message);
+            }
+
+  	        throw new Error(ex);
+        }
 
   		this.saveToken(result.token);
 

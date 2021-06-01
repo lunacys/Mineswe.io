@@ -63,7 +63,12 @@ export class AppComponent implements OnInit {
 			console.log(this.testDataFromServer);
 		}, error => console.error(error));
 
-		await this.authService.auth("SeedTest1", "masterkey");
+		try {
+            await this.authService.auth("asd", "asd");
+        } catch (ex) {
+		    console.error("Error while auth: ", ex);
+        }
+
 		/*const options = {
 			headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded")
 		};

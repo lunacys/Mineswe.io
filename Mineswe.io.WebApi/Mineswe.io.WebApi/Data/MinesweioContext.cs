@@ -14,6 +14,8 @@ namespace Mineswe.io.WebApi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<User>().ToTable("User");
         }
     }
