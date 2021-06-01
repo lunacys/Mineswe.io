@@ -1,5 +1,14 @@
 import { Component, ElementRef, NgZone, OnInit } from "@angular/core";
 import * as PIXI from "pixi.js";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { AuthServiceService } from "../services/auth-service.service";
+
+export interface WeatherData {
+	date: Date;
+	temperatureC: number;
+	temperatureF: number;
+	summary: string;
+}
 
 @Component({
 	selector: "app-root",
@@ -15,7 +24,9 @@ export class AppComponent implements OnInit {
 	public colorCornflowerBlue = 0x6495ed;
 	private stage: PIXI.Container;
 
-	constructor(private elementRef: ElementRef, private ngZone: NgZone) {
+	public testDataFromServer: WeatherData[] | null = null;
+
+	constructor(private elementRef: ElementRef, private ngZone: NgZone, private http: HttpClient, private authService: AuthServiceService) {
 		this.app = new PIXI.Application({
 			backgroundColor: this.colorCornflowerBlue,
 			width: this.gameWidth,
@@ -41,7 +52,36 @@ export class AppComponent implements OnInit {
 			this.initialize();
 		});
 
+		await this.ngZone.run(args => {
+
+		});
+
 		this.elementRef.nativeElement.appendChild(this.app.view);
+
+		this.http.get<WeatherData[]>("https://localhost:44328/WeatherForecast").subscribe(result => {
+			this.testDataFromServer = result;
+			console.log(this.testDataFromServer);
+		}, error => console.error(error));
+
+		await this.authService.auth("SeedTest1", "masterkey");
+		/*const options = {
+			headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded")
+		};
+
+		const body = new URLSearchParams();
+		body.set("Username", "SeedTest1");
+		body.set("Password", "masterkey");
+
+		this.http.post<UserData>("https://localhost:44328/auth/doAuth", body.toString(), options).subscribe(result => {
+			console.log(result);
+		}, error => console.error(error));*/
+
+		/*this.http.get("https://localhost:44359/WeatherForecast")
+			.toPromise()
+			.then((response) => {
+				this.testDataFromServer = <WeatherData>response;
+				console.log("Data: ", this.testDataFromServer);
+			});*/
 	}
 
 	initialize(): void {
