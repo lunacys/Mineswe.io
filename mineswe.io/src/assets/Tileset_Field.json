@@ -1,0 +1,69 @@
+{
+    "frames": {
+        "cellOpenEmpty.png": {
+            "frame": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen1.png": {
+            "frame": { "x": 100, "y": 0, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen2.png": {
+            "frame": { "x": 200, "y": 0, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen3.png": {
+            "frame": { "x": 300, "y": 0, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen4.png": {
+            "frame": { "x": 0, "y": 100, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen5.png": {
+            "frame": { "x": 100, "y": 100, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen6.png": {
+            "frame": { "x": 200, "y": 100, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen7.png": {
+            "frame": { "x": 300, "y": 100, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpen8.png": {
+            "frame": { "x": 0, "y": 200, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellClosed.png": {
+            "frame": { "x": 100, "y": 200, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellClosedFlag.png": {
+            "frame": { "x": 200, "y": 200, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        },
+        "cellOpenMine.png": {
+            "frame": { "x": 300, "y": 200, "w": 100, "h": 100 },
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
+            "sourceSize": { "w": 100, "h": 100 }
+        }
+    },
+    "meta": {
+        "image": "Tileset_Field.png",
+        "size": { "w": 400, "h": 300 },
+        "scale": "1"
+    }
+}
