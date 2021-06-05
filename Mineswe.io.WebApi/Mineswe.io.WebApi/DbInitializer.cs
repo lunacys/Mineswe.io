@@ -11,25 +11,48 @@ namespace Mineswe.io.WebApi
         {
             context.Database.EnsureCreated();
 
-            if (context.Users.Any())
-                return;
-
-            var users = new[]
+            if (!context.UserRoles.Any())
             {
-                new User
+                var roles = new[]
                 {
-                    Username = "loonacuse", Email = "loonacuse@gmail.com",
-                    PasswordHash = "/LrRkJV05/te0Fxx/hXK1Q==5NtLVcHFw4CcAnDmQuZOD5p/27RbvGDONUKRAd1fvGI=10000",
-                    RegistrationDate = DateTime.UtcNow
-                }
-            };
+                    new UserRole { RoleName = "Developer"},
+                    new UserRole { RoleName = "Administrator"},
+                    new UserRole { RoleName = "Moderator"},
+                    new UserRole { RoleName = "Supporter"},
+                    new UserRole { RoleName = "User"},
+                    new UserRole { RoleName = "Guest"}
+                };
 
-            foreach (var user in users)
-            {
-                context.Users.Add(user);
+                foreach (var role in roles)
+                {
+                    context.UserRoles.Add(role);
+                }
+
+                context.SaveChanges();
             }
 
-            context.SaveChanges();
+            if (!context.Users.Any())
+            {
+                var devRole = context.UserRoles.First(role => role.RoleName == "Developer");
+
+                var users = new[]
+                {
+                    new User
+                    {
+                        Username = "loonacuse", Email = "loonacuse@gmail.com",
+                        PasswordHash = "/LrRkJV05/te0Fxx/hXK1Q==5NtLVcHFw4CcAnDmQuZOD5p/27RbvGDONUKRAd1fvGI=10000",
+                        RegistrationDate = DateTime.UtcNow,
+                        Role = devRole
+                    }
+                };
+
+                foreach (var user in users)
+                {
+                    context.Users.Add(user);
+                }
+
+                context.SaveChanges();
+            }
         }
     }
 }

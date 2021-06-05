@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
 
 namespace Mineswe.io.WebApi.Models
 {
@@ -23,9 +24,14 @@ namespace Mineswe.io.WebApi.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime RegistrationDate { get; set; }
 
-        [JsonIgnore]
         [Required]
         [DataType(DataType.Password)]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public string PasswordHash { get; set; }
+
+        public int RoleId { get; set; }
+        [Required]
+        public UserRole Role { get; set; }
     }
 }
