@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { IAppConfig } from "./app-config-interface";
 import { HttpClient } from "@angular/common/http";
-import { environment } from "../environments/environment";
+import { environment } from "../../environments/environment";
 
 // @dynamic
 @Injectable({
