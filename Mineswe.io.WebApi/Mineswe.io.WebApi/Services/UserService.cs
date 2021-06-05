@@ -37,7 +37,7 @@ namespace Mineswe.io.WebApi.Services
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _dbContext.Users.ToListAsync();
+            return await _dbContext.Users.Include(u => u.Role).ToListAsync();
         }
 
         public async Task<User> GetByIdAsync(int id)
