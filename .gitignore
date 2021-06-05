@@ -7,3 +7,6 @@ dist/*
 # Project exclude paths
 /mineswe.io/dist/
 /mineswee.io.old/
+
+/Mineswe.io.WebApi/Mineswe.io.WebApi.sln.DotSettings
+/Mineswe.io.WebApi/Mineswe.io.WebApi/appsettings.Production.json
