@@ -52,9 +52,11 @@ namespace Mineswe.io.WebApi
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
+                    ValidateIssuer = true,
                     ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    ValidIssuer = AppVersionInfo.AppName + " " + AppVersionInfo.BuildVersion,
+                    ValidAudience = "Mineswe.IO"
                 };
             });
 
@@ -121,8 +123,6 @@ namespace Mineswe.io.WebApi
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // app.UseMiddleware<JwtMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

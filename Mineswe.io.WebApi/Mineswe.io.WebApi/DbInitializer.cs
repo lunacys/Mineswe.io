@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Data;
 using Mineswe.io.WebApi.Models;
 
@@ -7,25 +8,17 @@ namespace Mineswe.io.WebApi
 {
     public static class DbInitializer
     {
-        public static void Initialize(MinesweioContext context)
+        public static void Initialize(MinesweioContext context, AppSettings settings)
         {
             context.Database.EnsureCreated();
 
             if (!context.UserRoles.Any())
             {
-                var roles = new[]
-                {
-                    new UserRole { RoleName = "Developer"},
-                    new UserRole { RoleName = "Administrator"},
-                    new UserRole { RoleName = "Moderator"},
-                    new UserRole { RoleName = "Supporter"},
-                    new UserRole { RoleName = "User"},
-                    new UserRole { RoleName = "Guest"}
-                };
+                var roles = UserRoleInfo.AvailableRoles;
 
                 foreach (var role in roles)
                 {
-                    context.UserRoles.Add(role);
+                    context.UserRoles.Add(new UserRole {RoleName = role});
                 }
 
                 context.SaveChanges();
@@ -33,14 +26,14 @@ namespace Mineswe.io.WebApi
 
             if (!context.Users.Any())
             {
-                var devRole = context.UserRoles.First(role => role.RoleName == "Developer");
+                var devRole = context.UserRoles.First(role => role.RoleName == UserRoleInfo.Developer);
 
                 var users = new[]
                 {
                     new User
                     {
-                        Username = "loonacuse", Email = "loonacuse@gmail.com",
-                        PasswordHash = "/LrRkJV05/te0Fxx/hXK1Q==5NtLVcHFw4CcAnDmQuZOD5p/27RbvGDONUKRAd1fvGI=10000",
+                        Username = settings.DefaultUserName, Email = settings.DefaultUserEmail,
+                        PasswordHash = settings.DefaultUserPasswordHash,
                         RegistrationDate = DateTime.UtcNow,
                         Role = devRole
                     }

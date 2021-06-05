@@ -30,8 +30,11 @@ namespace Mineswe.io.WebApi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType),
+                // NotBefore = DateTime.UtcNow,
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = AppVersionInfo.AppName + " " + AppVersionInfo.BuildVersion,
+                Audience = "Mineswe.IO"
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
 

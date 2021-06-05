@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Mineswe.io.WebApi.Models;
 using Mineswe.io.WebApi.Services;
 using Newtonsoft.Json;
@@ -12,10 +13,12 @@ namespace Mineswe.io.WebApi.Controllers
     public class AuthController : ControllerBase
     {
         private IUserService _userService;
+        private ILogger<AuthController> _logger;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, ILogger<AuthController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
 
         // POST
@@ -31,7 +34,7 @@ namespace Mineswe.io.WebApi.Controllers
         }
 
         //[Authorize(Roles = "Developer,Administrator,Moderator")]
-        [Auth("Administrator")]
+        [Auth("Developer", "Administrator")]
         [HttpGet("getAll")]
         public async Task<IActionResult> GetAll()
         {

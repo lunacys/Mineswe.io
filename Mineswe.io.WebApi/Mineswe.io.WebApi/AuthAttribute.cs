@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Mineswe.io.WebApi.Models;
 
 namespace Mineswe.io.WebApi
 {
@@ -48,40 +46,5 @@ namespace Mineswe.io.WebApi
                 };
             }
         }
-
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
-        {
-            /*var user = (User) context.HttpContext.Items["User"];
-
-            if (user == null)
-            {
-                context.Result = new JsonResult(new { message = "Unauthorized" })
-                {
-                    StatusCode = StatusCodes.Status401Unauthorized
-                };
-
-                return;
-            }
-
-            if (user.Role == null)
-            {
-                context.Result = new JsonResult(new {message = "Role is not set"})
-                {
-                    StatusCode = StatusCodes.Status401Unauthorized
-                };
-
-                return;
-            }
-
-            if (Roles != null && !Roles.Contains(user.Role.RoleName))
-            {
-                context.Result = new JsonResult(new { message = "No Access Rights" })
-                {
-                    StatusCode = StatusCodes.Status403Forbidden
-                };
-            }*/
-        }
-
-        
     }
 }

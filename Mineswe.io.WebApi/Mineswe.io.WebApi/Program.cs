@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Data;
 
 namespace Mineswe.io.WebApi
@@ -37,7 +39,8 @@ namespace Mineswe.io.WebApi
             try
             {
                 var context = services.GetRequiredService<MinesweioContext>();
-                DbInitializer.Initialize(context);
+                var settings = services.GetRequiredService<IOptions<AppSettings>>();
+                DbInitializer.Initialize(context, settings.Value);
             }
             catch (Exception ex)
             {
