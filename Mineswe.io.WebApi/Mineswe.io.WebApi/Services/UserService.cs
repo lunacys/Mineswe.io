@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Mineswe.io.WebApi.Data;
 using Mineswe.io.WebApi.Models;
 
@@ -15,20 +9,20 @@ namespace Mineswe.io.WebApi.Services
 {
     public class UserService : IUserService
     {
-        private readonly AppSettings _appSettings;
         private readonly IPasswordHasherService _hasher;
         private readonly MinesweioContext _dbContext;
+        private readonly ITokenGenerator _tokenGenerator;
 
-        public UserService(IOptions<AppSettings> appSettings, IPasswordHasherService hasher, MinesweioContext dbContext)
+        public UserService(IPasswordHasherService hasher, MinesweioContext dbContext, ITokenGenerator tokenGenerator)
         {
-            _appSettings = appSettings.Value;
             _hasher = hasher;
             _dbContext = dbContext;
+            _tokenGenerator = tokenGenerator;
         }
 
         public async Task<AuthResponse> AuthenticateAsync(AuthRequest model)
         {
-            var user = await _dbContext.Users.Where(u => u.Username == model.Username).SingleOrDefaultAsync();
+            var user = await _dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Username == model.Username);
 
             if (user == null)
                 return null;
@@ -36,7 +30,7 @@ namespace Mineswe.io.WebApi.Services
             if (!_hasher.Check(user.PasswordHash, model.Password).Verified)
                 return null;
 
-            var token = GenerateJwtToken(user);
+            var token = _tokenGenerator.Generate(user);
 
             return new AuthResponse(user, token);
         }
@@ -48,22 +42,12 @@ namespace Mineswe.io.WebApi.Services
 
         public async Task<User> GetByIdAsync(int id)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        private string GenerateJwtToken(User user)
+        public async Task<User> GetByUsernameAsync(string username)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new [] { new Claim("id", user.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
+            return await _dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(user => user.Username == username);
         }
     }
 }

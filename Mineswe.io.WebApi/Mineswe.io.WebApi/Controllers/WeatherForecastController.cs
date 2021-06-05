@@ -25,7 +25,7 @@ namespace Mineswe.io.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<WeatherForecast>> Get()
+        public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
             //var muxer = await ConnectionMultiplexer.ConnectAsync("localhost:6379");

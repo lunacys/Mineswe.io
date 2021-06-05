@@ -1,4 +1,4 @@
-﻿namespace Mineswe.io.WebApi
+﻿namespace Mineswe.io.WebApi.Configurations
 {
     public sealed class HashingOptions
     {

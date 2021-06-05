@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Services;
 
 namespace Mineswe.io.WebApi
@@ -48,13 +50,13 @@ namespace Mineswe.io.WebApi
                 }, out var validatedToken);
 
                 var jwtToken = (JwtSecurityToken) validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var username = jwtToken.Claims.First(x => x.Type == "unique_name").Value;
 
-                context.Items["User"] = await userService.GetByIdAsync(userId);
+                context.Items["User"] = await userService.GetByUsernameAsync(username);
             }
             catch (Exception e)
             {
-                
+                Console.WriteLine(e.Message);
             }
         }
     }

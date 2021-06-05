@@ -9,5 +9,6 @@ namespace Mineswe.io.WebApi.Services
         Task<AuthResponse> AuthenticateAsync(AuthRequest model);
         Task<IEnumerable<User>> GetAllAsync();
         Task<User> GetByIdAsync(int id);
+        Task<User> GetByUsernameAsync(string username);
     }
 }

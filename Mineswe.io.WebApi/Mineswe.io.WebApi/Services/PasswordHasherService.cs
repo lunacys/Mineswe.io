@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
+using Mineswe.io.WebApi.Configurations;
 
 namespace Mineswe.io.WebApi.Services
 {
@@ -30,6 +31,11 @@ namespace Mineswe.io.WebApi.Services
 
         public (bool Verified, bool NeedsUpgrade) Check(string hash, string password)
         {
+            if (string.IsNullOrEmpty(hash))
+                throw new ArgumentNullException(nameof(hash), "Hash is null or empty");
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentNullException(nameof(password), "Password is null or empty");
+
             var parts = new string[3];
 
             var saltSize = GetOutputBase64Size(SaltSize);
