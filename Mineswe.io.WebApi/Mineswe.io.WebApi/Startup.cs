@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -61,9 +62,9 @@ namespace Mineswe.io.WebApi
             });
 
             services.AddCors();
-            services
-                .AddControllers()
-                .AddNewtonsoftJson();
+            //services.AddNewtonsoftJson();
+            //.AddControllers()
+
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -79,11 +80,15 @@ namespace Mineswe.io.WebApi
                 c.SwaggerDoc(AppVersionInfo.OpenApiInfo.Version, AppVersionInfo.OpenApiInfo);
                 c.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "swagger.xml"));
             });
+
+            services.AddControllersWithViews().AddNewtonsoftJson();
             
             services.AddSpaStaticFiles(options =>
             {
                 options.RootPath = "../../mineswe.io/dist/minesweio";
             });
+
+            // services.AddMvc(options => options.EnableEndpointRouting = false);
 
 
             services.AddScoped<ITokenGenerator, TokenGenerator>();
@@ -102,7 +107,7 @@ namespace Mineswe.io.WebApi
             }
             else
             {
-                app.UseExceptionHandler("/error");
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
@@ -124,24 +129,29 @@ namespace Mineswe.io.WebApi
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            
+            app.UseStaticFiles();
+            if (!env.IsDevelopment())
             {
-                endpoints.MapControllers();
-            });
-
-            if (env.IsProduction())
-            {
-                app.UseStaticFiles();
                 app.UseSpaStaticFiles();
             }
 
+            app.UseEndpoints(endpoints =>
+            {
+                //endpoints.MapControllers();
+                endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
+            });
+            var useProxy = Configuration.GetValue<bool>("UseProxyAngular");
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "../../mineswe.io";
 
                 if (env.IsDevelopment())
                 {
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                    if (useProxy)
+                        spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                    else
+                        spa.UseAngularCliServer("start");
                 }
             });
         }
