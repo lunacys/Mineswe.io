@@ -1,0 +1,69 @@
+name: Mineswe.IO Publish
+
+on:
+  release:
+    types: [ published ]
+    tags:
+      - v*
+
+
+env:
+  CLIENT_IMAGE_NAME: client
+  SERVER_IMAGE_NAME: server
+
+jobs:
+  client-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file mineswe.io/Dockerfile --tag $CLIENT_IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_PUB }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Push client image
+        run: |
+          echo IMAGE_NAME=client
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$CLIENT_IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          echo IMAGE_ID=$IMAGE_ID
+
+          docker tag $CLIENT_IMAGE_NAME $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+
+
+  server-push-image:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: Mineswe.io.WebApi/Mineswe.io.WebApi
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --tag $SERVER_IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_PUB }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Push server image
+        run: |
+          echo IMAGE_NAME=server
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$SERVER_IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          echo IMAGE_ID=$IMAGE_ID
+
+          docker tag $SERVER_IMAGE_NAME $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+
