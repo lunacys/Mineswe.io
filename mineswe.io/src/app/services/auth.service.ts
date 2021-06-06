@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { AppConfig } from "../shared/app-config";
 import { Subscription } from "rxjs";
 import { tap } from "rxjs/operators";
+import { UserService } from "./user.service";
+import { LocalStorageService } from "./local-storage.service";
 
 export interface UserData {
     id: number;
@@ -40,54 +42,45 @@ export class AuthService {
         return this._onAuthChanged.subscribe(callback);
     }
 
-    constructor(private http: HttpClient, private appConfig: AppConfig) {
+    constructor(private http: HttpClient, private userService: UserService, private localStorageService: LocalStorageService) {
         this._httpOptions = {
             headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded"),
         };
     }
 
     public async auth(username: string, password: string): Promise<UserData> {
-        let result: UserData;
+        const existingUser = this.localStorageService.getUser();
+        if (existingUser !== null) {
+            try {
+                this._token = existingUser.token;
+                this.authAsUser();
+                return this.userService.getUserData();
+            } catch (ex) {
+                throw new Error(this.getErrorMessage(ex));
+            }
+        } else {
+            let result: UserData | null = null;
 
-        try {
-            /*result = <UserData>((<unknown>(await this.http.post<UserData>(
-                            this.appConfig.Settings.connection.apiBaseUrl + "/auth",
-                            this.createBody(username, password),
-                            this._httpOptions
-                        )
-                        .toPromise()
-                ))
-            );*/
-            result = await this.http
-                .post<UserData>("/auth", this.createBody(username, password), {
-                    responseType: "json",
-                    headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded")
-                })
-                .pipe(tap(response => console.log("Sent login", response)))
-                .toPromise();
-        } catch (ex) {
-            if (ex && ex.error && ex.error.message) {
-                throw new Error(ex.error.message);
+            try {
+                result = await this.http
+                    .post<UserData>("/auth", this.createBody(username, password))
+                    .toPromise();
+            } catch (ex) {
+                throw new Error(this.getErrorMessage(ex));
             }
 
-            if (ex && ex.error) {
-                throw new Error(ex.error);
+            if (result === null) {
+                throw new Error("Invalid response data");
             }
 
-            if (ex && ex.message) {
-                throw new Error(ex.message);
-            }
+            this.localStorageService.updateUser(result.username, result.token);
+            this._token = result.token;
+            this.authAsUser();
 
-            throw new Error(ex);
+            return result;
         }
-
-        this.updateToken(result.token);
-        this._isSignedIn = true;
-        this._authType = "asUser";
-        this._onAuthChanged.emit(this._authType);
-
-        return result;
     }
+
 
     public authAsGuest(): void {
         this._isSignedIn = true;
@@ -95,21 +88,17 @@ export class AuthService {
         this._onAuthChanged.emit(this._authType);
     }
 
-    public signOut(): void {
-        this.updateToken(null);
-        this._isSignedIn = false;
-        this._authType = "none";
+    private authAsUser(): void {
+        this._isSignedIn = true;
+        this._authType = "asUser";
         this._onAuthChanged.emit(this._authType);
     }
 
-    private updateToken(token: string | null) {
-        this._token = token;
-
-        if (token) {
-            this.saveToken(token);
-        } else {
-            this.removeToken();
-        }
+    public signOut(): void {
+        this.localStorageService.updateUser(null, null);
+        this._isSignedIn = false;
+        this._authType = "none";
+        this._onAuthChanged.emit(this._authType);
     }
 
     private createBody(username: string, password: string): string {
@@ -120,11 +109,16 @@ export class AuthService {
         return body.toString();
     }
 
-    private saveToken(token: string): void {
-        localStorage.setItem("token", token);
-    }
-
-    private removeToken(): void {
-        localStorage.removeItem("token");
+    private getErrorMessage(ex: any): string {
+        if (ex && ex.error && ex.error.message) {
+            return ex.error.message;
+        }
+        if (ex && ex.error) {
+            return ex.error;
+        }
+        if (ex && ex.message) {
+            return ex.message;
+        }
+        return ex.toString();
     }
 }

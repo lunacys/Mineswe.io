@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from "@angular/common/http";
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { EnvironmentService } from "../services/environment.service";
 
@@ -10,7 +10,11 @@ export class ApiUrlInterceptor implements HttpInterceptor {
     intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
         if (!request.url.startsWith("assets")) {
             request = request.clone({
-               url: this.environmentService.getValue("apiUrl") + request.url
+                url: this.environmentService.getValue("apiUrl") + request.url,
+                responseType: "json",
+                setHeaders: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
             });
         }
 

@@ -250,5 +250,33 @@ namespace Mineswe.io.WebApi.Controllers
                 return BadRequest(new ErrorResponse {Error = e.Message});
             }
         }
+
+        [Auth]
+        [HttpGet("[action]")]
+        [ProducesResponseType(typeof(User), 200)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUserData()
+        {
+            try
+            {
+                var usernameClaim = HttpContext.User.FindFirst(ClaimsIdentity.DefaultNameClaimType);
+
+                if (usernameClaim == null)
+                    return BadRequest(new ErrorResponse { Error = "Invalid claim" });
+
+                var user = await _userService.GetByUsernameAsync(usernameClaim.Value);
+
+                if (user == null)
+                    return BadRequest(new ErrorResponse { Error = "No user found for current claim: " + usernameClaim.Value });
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(new ErrorResponse { Error = e.Message });
+            }
+        }
     }
 }

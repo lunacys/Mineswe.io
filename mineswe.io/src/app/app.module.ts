@@ -9,6 +9,7 @@ import { interceptors } from "./app.interceptors";
 import { ENVIRONMENT } from "./services/environment.service";
 import { environment } from "../environments/environment";
 import { LogFactoryService } from "./services/log-factory.service";
+import { LocalStorageService } from "./services/local-storage.service";
 
 @NgModule({
 	declarations: [AppComponent],
@@ -20,6 +21,7 @@ import { LogFactoryService } from "./services/log-factory.service";
 	providers: [
 	    HttpClient,
         LogFactoryService,
+        LocalStorageService,
         AppInitializer,
         interceptors,
         {
