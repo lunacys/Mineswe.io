@@ -8,6 +8,10 @@ export interface UserData {
     username: string;
     email: string;
     token: string;
+    role: {
+        id: number;
+        roleName: string;
+    };
 }
 
 export type AuthType = "none" | "asUser" | "asGuest";
@@ -40,11 +44,8 @@ export class AuthServiceService {
         let result: UserData;
 
         try {
-            result = <UserData>(
-                (<unknown>(
-                    await this.http
-                        .post<UserData>(
-                            this.appConfig.Settings.connection.apiAuthUrl + "/doAuth",
+            result = <UserData>((<unknown>(await this.http.post<UserData>(
+                            this.appConfig.Settings.connection.apiBaseUrl + "/auth",
                             this.createBody(username, password),
                             this._httpOptions
                         )
@@ -55,7 +56,7 @@ export class AuthServiceService {
             if (ex && ex.error && ex.error.message) {
                 throw new Error(ex.error.message);
             }
-            
+
             if (ex && ex.error) {
                 throw new Error(ex.error);
             }

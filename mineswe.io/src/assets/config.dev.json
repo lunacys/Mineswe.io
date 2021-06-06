@@ -1,6 +1,6 @@
 {
     "connection": {
-        "apiBaseUrl": "https://localhost:44328",
+        "apiBaseUrl": "https://localhost:44328/api",
         "apiAuthUrl": "https://localhost:44328/auth"
     }
 }
