@@ -1,7 +1,8 @@
 import { EventEmitter, Injectable } from "@angular/core";
-import { HttpClient, HttpHandler, HttpHeaders, HttpRequest } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { AppConfig } from "../shared/app-config";
 import { Subscription } from "rxjs";
+import { tap } from "rxjs/operators";
 
 export interface UserData {
     id: number;
@@ -19,15 +20,20 @@ export type AuthType = "none" | "asUser" | "asGuest";
 @Injectable({
     providedIn: "root",
 })
-export class AuthServiceService {
+export class AuthService {
     private readonly _httpOptions: any;
 
     private _isSignedIn = false;
     private _authType: AuthType = "none";
     private _onAuthChanged: EventEmitter<AuthType> = new EventEmitter<AuthType>();
+    private _token: string | null = null;
 
     public get isSignedIn(): boolean {
         return this._isSignedIn;
+    }
+
+    public get token(): string | null {
+        return this._token;
     }
 
     public subscribeOnAuthChanged(callback: (authType: AuthType) => void): Subscription {
@@ -44,14 +50,21 @@ export class AuthServiceService {
         let result: UserData;
 
         try {
-            result = <UserData>((<unknown>(await this.http.post<UserData>(
+            /*result = <UserData>((<unknown>(await this.http.post<UserData>(
                             this.appConfig.Settings.connection.apiBaseUrl + "/auth",
                             this.createBody(username, password),
                             this._httpOptions
                         )
                         .toPromise()
                 ))
-            );
+            );*/
+            result = await this.http
+                .post<UserData>("/auth", this.createBody(username, password), {
+                    responseType: "json",
+                    headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded")
+                })
+                .pipe(tap(response => console.log("Sent login", response)))
+                .toPromise();
         } catch (ex) {
             if (ex && ex.error && ex.error.message) {
                 throw new Error(ex.error.message);
@@ -68,7 +81,7 @@ export class AuthServiceService {
             throw new Error(ex);
         }
 
-        this.saveToken(result.token);
+        this.updateToken(result.token);
         this._isSignedIn = true;
         this._authType = "asUser";
         this._onAuthChanged.emit(this._authType);
@@ -83,10 +96,20 @@ export class AuthServiceService {
     }
 
     public signOut(): void {
-        this.removeToken();
+        this.updateToken(null);
         this._isSignedIn = false;
         this._authType = "none";
         this._onAuthChanged.emit(this._authType);
+    }
+
+    private updateToken(token: string | null) {
+        this._token = token;
+
+        if (token) {
+            this.saveToken(token);
+        } else {
+            this.removeToken();
+        }
     }
 
     private createBody(username: string, password: string): string {

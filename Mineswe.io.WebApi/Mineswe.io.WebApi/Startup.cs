@@ -64,7 +64,16 @@ namespace Mineswe.io.WebApi
                 };
             });
 
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("Mineswe.IO Policy", builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
             services.AddControllersWithViews().AddNewtonsoftJson();
             //services.AddControllers().AddNewtonsoftJson();
 
@@ -137,7 +146,7 @@ namespace Mineswe.io.WebApi
             });
 
             app.UseRouting();
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors("Mineswe.IO Policy");
 
             app.Use(async (context, next) =>
             {

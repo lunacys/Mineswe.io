@@ -10,3 +10,4 @@ dist/*
 
 /Mineswe.io.WebApi/Mineswe.io.WebApi.sln.DotSettings
 /Mineswe.io.WebApi/Mineswe.io.WebApi/appsettings.Production.json
+/mineswe.io/obj/Docker/CanonicalServiceNames.cache

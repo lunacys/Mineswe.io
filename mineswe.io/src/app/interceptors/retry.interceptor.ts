@@ -15,7 +15,7 @@ export class RetryInterceptor implements HttpInterceptor {
         return next.handle(request).pipe(
             catchError((err: HttpErrorResponse) => {
                 if (err.status === 0 && count > 1) {
-                    console.warn("retrying..");
+                    console.warn("retrying #" + (4 - count));
                     const newReq = request.clone();
                     return this.trySend(newReq, next, count - 1);
                 } else {

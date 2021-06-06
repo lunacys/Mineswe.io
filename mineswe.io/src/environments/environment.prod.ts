@@ -4,5 +4,5 @@ export const environment: IEnvironment = {
     production: true,
     name: "prod",
     isDebug: true,
-    apiUrl: ""
+    apiUrl: "https://localhost:44328/api"
 };
