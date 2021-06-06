@@ -4,6 +4,8 @@ import { AppComponent } from "./components/app.component";
 
 const routes: Routes = [
     //{ path: "", component: AppComponent }
+    {path: "swagger", redirectTo: "swagger/index.html"},
+    {path: "swagger/index.html", redirectTo: "swagger/index.html"}
 ];
 
 @NgModule({

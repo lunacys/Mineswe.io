@@ -1,10 +1,14 @@
-import { NgModule } from "@angular/core";
+import { LOCALE_ID, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./components/app.component";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { AppInitializer } from "./shared/app-initializer";
+import { interceptors } from "./app.interceptors";
+import { ENVIRONMENT } from "./services/environment.service";
+import { environment } from "../environments/environment";
+import { LogFactoryService } from "./services/log-factory.service";
 
 @NgModule({
 	declarations: [AppComponent],
@@ -13,7 +17,20 @@ import { AppInitializer } from "./shared/app-initializer";
 		AppRoutingModule,
 		HttpClientModule
 	],
-	providers: [HttpClient, AppInitializer],
+	providers: [
+	    HttpClient,
+        LogFactoryService,
+        AppInitializer,
+        interceptors,
+        {
+            provide: LOCALE_ID,
+            useValue: "en"
+        },
+        {
+            provide: ENVIRONMENT,
+            useValue: environment
+        }
+    ],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
