@@ -4,10 +4,11 @@
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>ef8ac908-279f-4081-9e4a-680a5c63e13f</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin/Debug/swagger.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\swagger.xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 

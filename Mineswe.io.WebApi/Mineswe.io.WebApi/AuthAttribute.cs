@@ -38,7 +38,7 @@ namespace Mineswe.io.WebApi
             }
 
             if (!userClaims.Any(claim =>
-                claim.Type == ClaimsIdentity.DefaultRoleClaimType && Roles.Contains(claim.Value)))
+                claim.Type == ClaimsIdentity.DefaultRoleClaimType && (Roles == null || Roles.Contains(claim.Value))))
             {
                 context.Result = new JsonResult(new { message = "No Access Rights" })
                 {

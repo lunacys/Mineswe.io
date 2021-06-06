@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +25,7 @@ using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Configurations.SwaggerFilters;
 using Mineswe.io.WebApi.Data;
 using Mineswe.io.WebApi.Services;
+using Mineswe.io.WebApi.Services.Authentication;
 
 namespace Mineswe.io.WebApi
 {
@@ -62,9 +65,8 @@ namespace Mineswe.io.WebApi
             });
 
             services.AddCors();
-            //services.AddNewtonsoftJson();
-            //.AddControllers()
-
+            services.AddControllersWithViews().AddNewtonsoftJson();
+            //services.AddControllers().AddNewtonsoftJson();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -75,25 +77,30 @@ namespace Mineswe.io.WebApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SchemaFilter<HideDocumentFilter>();
-                c.DocumentFilter<HideDocumentFilter>();
+                //c.SchemaFilter<HideDocumentFilter>();
+                //c.DocumentFilter<HideDocumentFilter>();
                 c.SwaggerDoc(AppVersionInfo.OpenApiInfo.Version, AppVersionInfo.OpenApiInfo);
                 c.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "swagger.xml"));
             });
 
-            services.AddControllersWithViews().AddNewtonsoftJson();
-            
+            //services.AddControllersWithViews().AddNewtonsoftJson();
+
             services.AddSpaStaticFiles(options =>
             {
                 options.RootPath = "../../mineswe.io/dist/minesweio";
             });
 
-            // services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
+            //services.AddMvc(options => options.EnableEndpointRouting = false);
 
-            services.AddScoped<ITokenGenerator, TokenGenerator>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenGeneratorService, TokenGeneratorService>();
             services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthSerivce, AuthService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,7 +108,8 @@ namespace Mineswe.io.WebApi
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Error");
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint($"/swagger/{AppVersionInfo.OpenApiInfo.Version}/swagger.json", $"Mineswe.io.WebApi {AppVersionInfo.BuildVersion}"));
             }
@@ -115,8 +123,21 @@ namespace Mineswe.io.WebApi
 
             app.UseDefaultFiles();
 
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Response.StatusCode == 404)
+                {
+                    string originalPath = context.Request.Path.Value;
+                    context.Items["originalPath"] = originalPath;
+                    context.Request.Path = "/Error";
+                    await next();
+                }
+                    
+            });
+
             app.UseRouting();
-            app.UseCors(builder => builder.WithOrigins("http://localhost:4200"));
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.Use(async (context, next) =>
             {
@@ -129,7 +150,6 @@ namespace Mineswe.io.WebApi
             app.UseAuthentication();
             app.UseAuthorization();
 
-            
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {
@@ -138,14 +158,24 @@ namespace Mineswe.io.WebApi
 
             app.UseEndpoints(endpoints =>
             {
-                //endpoints.MapControllers();
+                endpoints.MapControllers();
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
+                
             });
+
+            /*app.Run(context =>
+            {
+                if (context.Request.)
+                context.Response.WriteAsJsonAsync(new {Message = "Invalid URL"});
+            });*/
+
+
+            //app.UseStatusCodePages();
             var useProxy = Configuration.GetValue<bool>("UseProxyAngular");
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "../../mineswe.io";
-
+                
                 if (env.IsDevelopment())
                 {
                     if (useProxy)
@@ -154,6 +184,8 @@ namespace Mineswe.io.WebApi
                         spa.UseAngularCliServer("start");
                 }
             });
+
+            //app.UseMvc();
         }
     }
 }

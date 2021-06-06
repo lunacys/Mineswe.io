@@ -1,4 +1,4 @@
-﻿namespace Mineswe.io.WebApi.Services
+﻿namespace Mineswe.io.WebApi.Services.Authentication
 {
     public interface IPasswordHasherService
     {

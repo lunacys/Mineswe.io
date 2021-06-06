@@ -4,42 +4,41 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mineswe.io.WebApi.Models;
 using Mineswe.io.WebApi.Services;
+using Mineswe.io.WebApi.Services.Authentication;
 using Newtonsoft.Json;
 
 namespace Mineswe.io.WebApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api")]
     public class AuthController : ControllerBase
     {
-        private IUserService _userService;
-        private ILogger<AuthController> _logger;
+        private readonly IUserService _userService;
+        private readonly ILogger<AuthController> _logger;
+        private readonly IAuthSerivce _authService;
 
-        public AuthController(IUserService userService, ILogger<AuthController> logger)
+        public AuthController(IUserService userService, IAuthSerivce authService, ILogger<AuthController> logger)
         {
             _userService = userService;
             _logger = logger;
+            _authService = authService;
         }
 
         // POST
-        [HttpPost("doAuth")]
-        public async Task<IActionResult> DoAuth([FromForm] AuthRequest model)
+        /// <summary>
+        /// Auth and get JWT
+        /// </summary>
+        /// <param name="model">Auth Request</param>
+        /// <returns>Token Data</returns>
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Auth([FromForm] AuthRequest model)
         {
-            var response = await _userService.AuthenticateAsync(model);
+            var response = await _authService.AuthAsync(model);
 
             if (response == null)
                 return BadRequest(new {message = "Invalid Username or Password"});
 
             return Ok(response);
-        }
-
-        //[Authorize(Roles = "Developer,Administrator,Moderator")]
-        [Auth("Developer", "Administrator")]
-        [HttpGet("getAll")]
-        public async Task<IActionResult> GetAll()
-        {
-            var users = await _userService.GetAllAsync();
-            return Ok(users);
         }
     }
 }

@@ -26,9 +26,12 @@ namespace Mineswe.io.WebApi.Models
 
         [Required]
         [DataType(DataType.Password)]
-        [System.Text.Json.Serialization.JsonIgnore]
         [JsonIgnore]
         public string PasswordHash { get; set; }
+
+        [JsonIgnore]
+        [NotMapped]
+        public string Password { get; set; }
 
         public int RoleId { get; set; }
         [Required]

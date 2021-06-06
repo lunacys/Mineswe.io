@@ -6,9 +6,12 @@ namespace Mineswe.io.WebApi.Services
 {
     public interface IUserService
     {
-        Task<AuthResponse> AuthenticateAsync(AuthRequest model);
         Task<IEnumerable<User>> GetAllAsync();
         Task<User> GetByIdAsync(int id);
         Task<User> GetByUsernameAsync(string username);
+        Task<User> GetByEmailAsync(string email);
+        Task<User> RegisterAsync(UserRegisterRequest model);
+        Task ChangePasswordByIdAsync(int id, string oldPassword, string newPassword);
+        Task<User> UpdateAsync(User user);
     }
 }

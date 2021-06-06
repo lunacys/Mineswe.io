@@ -7,13 +7,13 @@ using Microsoft.IdentityModel.Tokens;
 using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Models;
 
-namespace Mineswe.io.WebApi.Services
+namespace Mineswe.io.WebApi.Services.Authentication
 {
-    public class TokenGenerator : ITokenGenerator
+    public class TokenGeneratorService : ITokenGeneratorService
     {
         private readonly AppSettings _appSettings;
 
-        public TokenGenerator(IOptions<AppSettings> appSettings)
+        public TokenGeneratorService(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
         }

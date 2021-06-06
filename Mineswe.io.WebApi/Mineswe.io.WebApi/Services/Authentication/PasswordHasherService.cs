@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Mineswe.io.WebApi.Configurations;
 
-namespace Mineswe.io.WebApi.Services
+namespace Mineswe.io.WebApi.Services.Authentication
 {
     public sealed class PasswordHasherService : IPasswordHasherService
     {

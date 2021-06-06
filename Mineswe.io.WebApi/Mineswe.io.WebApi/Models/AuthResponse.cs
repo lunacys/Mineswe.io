@@ -1,4 +1,6 @@
-﻿namespace Mineswe.io.WebApi.Models
+﻿using System;
+
+namespace Mineswe.io.WebApi.Models
 {
     public class AuthResponse
     {
@@ -6,6 +8,8 @@
         public string Username { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
+        public string Role { get; set; }
+        public DateTime RegistrationDate { get; set; }
 
         public AuthResponse(User user, string token)
         {
@@ -13,6 +17,8 @@
             Username = user.Username;
             Email = user.Email;
             Token = token;
+            Role = user.Role.RoleName;
+            RegistrationDate = user.RegistrationDate;
         }
     }
 }

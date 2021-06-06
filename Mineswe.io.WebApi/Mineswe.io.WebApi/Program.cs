@@ -39,6 +39,8 @@ namespace Mineswe.io.WebApi
             try
             {
                 var context = services.GetRequiredService<MinesweioContext>();
+                context.Database.EnsureCreated();
+
                 var settings = services.GetRequiredService<IOptions<AppSettings>>();
                 DbInitializer.Initialize(context, settings.Value);
             }
