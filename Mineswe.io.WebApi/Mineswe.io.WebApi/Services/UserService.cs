@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Mineswe.io.WebApi.Data;
@@ -114,6 +115,30 @@ namespace Mineswe.io.WebApi.Services
         public async Task<User> UpdateAsync(User user)
         {
             throw new System.NotImplementedException();
+        }
+
+        public async Task UpdateRoleByUsernameAsync(string username, string newRoleName)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new Exception("Username is empty");
+            if (string.IsNullOrEmpty(newRoleName))
+                throw new Exception("New role name is empty");
+            if (!UserRoleInfo.AvailableRoles.Contains(newRoleName))
+                throw new Exception("Invalid role name: " + newRoleName);
+
+            var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Username == username);
+
+            if (user == null)
+                throw new Exception("Cannot find user with name " + username);
+
+            var role = await _dbContext.UserRoles.SingleOrDefaultAsync(x => x.RoleName == newRoleName);
+
+            if (role == null)
+                throw new Exception("Cannot find role with name " + newRoleName);
+
+            user.Role = role;
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

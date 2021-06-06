@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Mineswe.io.WebApi.Models;
 using Mineswe.io.WebApi.Services;
 
@@ -14,10 +15,12 @@ namespace Mineswe.io.WebApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -41,7 +44,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse {Error = e.Message});
             }
         }
@@ -68,7 +71,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse {Error = e.Message});
             }
         }
@@ -95,7 +98,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse { Error = e.Message });
             }
         }
@@ -122,7 +125,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse { Error = e.Message });
             }
         }
@@ -148,7 +151,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse{Error = e.Message});
             }
         }
@@ -167,7 +170,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse{Error = e.Message});
             }
         }
@@ -194,7 +197,7 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse{ Error = e.Message });
             }
         }
@@ -224,7 +227,26 @@ namespace Mineswe.io.WebApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e.Message);
+                return BadRequest(new ErrorResponse {Error = e.Message});
+            }
+        }
+
+        [Auth("Developer", "Administrator")]
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(SuccessResponse), 200)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateRole([FromForm] string username, [FromForm] string newRoleName)
+        {
+            try
+            {
+                await _userService.UpdateRoleByUsernameAsync(username, newRoleName);
+                return Ok(new SuccessResponse {Message = "Success"});
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
                 return BadRequest(new ErrorResponse {Error = e.Message});
             }
         }

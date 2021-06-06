@@ -13,5 +13,6 @@ namespace Mineswe.io.WebApi.Services
         Task<User> RegisterAsync(UserRegisterRequest model);
         Task ChangePasswordByIdAsync(int id, string oldPassword, string newPassword);
         Task<User> UpdateAsync(User user);
+        Task UpdateRoleByUsernameAsync(string username, string newRoleName);
     }
 }
