@@ -1,3 +1,11 @@
 *, html, body {
   margin: 0;
 }
+
+.error-message-panel {
+    width: 256px;
+    height: 24px;
+    text-align: center;
+    background: red;
+    color: black;
+}

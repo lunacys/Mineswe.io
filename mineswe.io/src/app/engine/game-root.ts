@@ -1,107 +1,58 @@
-import { Component, ElementRef, NgZone, OnInit } from "@angular/core";
 import * as PIXI from "pixi.js";
-import { HttpClient } from "@angular/common/http";
-import { AuthService } from "../services/auth.service";
-import { LogFactoryService } from "../services/log-factory.service";
-import { Logger } from "../shared/logging/logger";
-import { LogLevel } from "../shared/logging/log-level";
 import { ILogger } from "../shared/logging/logger-interface";
-import { UserService } from "../services/user.service";
+import { LoggerFactory } from "../shared/logging/logger-factory";
+import { Color } from "./color";
 
-export interface WeatherData {
-    date: Date;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+export class GameRoot {
+    public Application: PIXI.Application;
+    public Stage: PIXI.Container;
+    public get Width(): number {
+        return this._width;
+    }
+    public get Height(): number {
+        return this._height;
+    }
+    public get TotalTime(): number {
+        return this._totalTime;
+    }
 
-@Component({
-    selector: "app-root",
-    templateUrl: "./app.component.html",
-    styleUrls: ["./app.component.scss"],
-})
-export class AppComponent implements OnInit {
-    title = "minesweio";
+    protected logger: ILogger;
 
-    public readonly gameWidth = 800;
-    public readonly gameHeight = 600;
-    private app: PIXI.Application;
-    public colorCornflowerBlue = 0x6495ed;
-    private stage: PIXI.Container;
+    private _width: number;
+    private _height: number;
+    private _totalTime: number = 0;
 
-    private _logger: ILogger;
+    constructor(width: number = 800, height: number = 600) {
+        this._width = width;
+        this._height = height;
 
-    public testDataFromServer: WeatherData[] | null = null;
-
-    constructor(
-        private elementRef: ElementRef,
-        private ngZone: NgZone,
-        private http: HttpClient,
-        private authService: AuthService,
-        private logFactory: LogFactoryService,
-        private userService: UserService
-    ) {
-        this.app = new PIXI.Application({
-            backgroundColor: this.colorCornflowerBlue,
-            width: this.gameWidth,
-            height: this.gameHeight,
+        this.Application = new PIXI.Application({
+            backgroundColor: Color.CornflowerBlue,
+            width: this.Width,
+            height: this.Height,
             antialias: true,
             autoDensity: true,
             resolution: window.devicePixelRatio,
         });
+        this.Stage = this.Application.stage;
 
-        this.stage = this.app.stage;
-
-        this._logger = logFactory.getLogger("AppComponent");
+        this.logger = LoggerFactory.getLogger("GameRoot");
     }
 
-    async ngOnInit(): Promise<void> {
-        await this.ngZone.runOutsideAngular(async () => {
-            try {
-                await this.loadGameAssets();
-            } catch (ex) {
-                console.error("Exception while loading game assets: ", ex);
-            }
+    public async run(): Promise<void> {
+        await this.initialize();
 
-            this.resizeCanvas();
+    }
 
-            this.initialize();
-        });
-
-        await this.ngZone.run((args) => {});
-
-        this.elementRef.nativeElement.appendChild(this.app.view);
-
+    protected async initialize(): Promise<void> {
         try {
-            const userData = await this.authService.auth("test2", "masterkey");
-            console.log("Authenticated successfully. Your data: ", userData);
+            await this.loadAssets();
         } catch (ex) {
-            console.error("Error while auth: ", ex);
+            this.logger.logError("Error while loading assets: ", ex);
         }
 
-        await this.userService.GetAll();
+        this.resizeCanvas();
 
-        /*const options = {
-			headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded")
-		};
-
-		const body = new URLSearchParams();
-		body.set("Username", "SeedTest1");
-		body.set("Password", "masterkey");
-
-		this.http.post<UserData>("https://localhost:44328/auth/doAuth", body.toString(), options).subscribe(result => {
-			console.log(result);
-		}, error => console.error(error));*/
-
-        /*this.http.get("https://localhost:44359/WeatherForecast")
-			.toPromise()
-			.then((response) => {
-				this.testDataFromServer = <WeatherData>response;
-				console.log("Data: ", this.testDataFromServer);
-			});*/
-    }
-
-    initialize(): void {
         const mineField = this.getMineField();
         mineField.pivot.x = 200;
         mineField.pivot.y = 200;
@@ -137,7 +88,7 @@ export class AppComponent implements OnInit {
             console.log("mouseover [addListener]");
         });
 
-        this.stage.addChild(mineField);
+        this.Stage.addChild(mineField);
 
         window.addEventListener("wheel", ($event) => {
             if ($event.deltaY < 0 && mineField.scale.x < 3.0) {
@@ -205,7 +156,7 @@ export class AppComponent implements OnInit {
             spinnerContainer = container;
             container.interactive = true;
             container.position.set(position.x, position.y);
-            this.stage.addChild(container);
+            this.Stage.addChild(container);
 
             const halfCircle = new PIXI.Graphics();
             halfCircle.beginFill(0xff0000);
@@ -255,12 +206,27 @@ export class AppComponent implements OnInit {
             });
         }
 
-        if (this.app) {
-            this.app.ticker.add((delta) => gameLoop(delta));
+        if (this.Application) {
+            this.Application.ticker.add((delta) => {
+                this._totalTime += delta;
+                this.update(delta);
+
+                spinners.forEach((cb) => {
+                    cb(delta);
+                });
+            });
         }
     }
 
-    async loadGameAssets(): Promise<void> {
+    protected update(dt: number): void {
+
+    }
+
+    protected render(renderer: PIXI.Renderer): void {
+
+    }
+
+    private loadAssets(): Promise<void> {
         return new Promise((res, rej) => {
             const loader = PIXI.Loader.shared;
             loader.add("mineField", "./assets/Tileset_Field.json");
@@ -277,32 +243,7 @@ export class AppComponent implements OnInit {
         });
     }
 
-    resizeCanvas(): void {
-        const resize = () => {
-            if (this.app) {
-                //this.app.renderer.resize(window.innerWidth, window.innerHeight);
-            }
-            //app.stage.scale.x = window.innerWidth / gameWidth;
-            //app.stage.scale.y = window.innerHeight / gameHeight;
-        };
-
-        resize();
-
-        window.addEventListener("resize", resize);
-    }
-
-    getBird(): PIXI.Sprite {
-        const bird = new PIXI.Sprite(PIXI.Texture.from("cellOpen1.png"));
-
-        //bird.loop = true;
-        //bird.animationSpeed = 0.1;
-        //bird.play();
-        //bird.scale.set(3);
-
-        return bird;
-    }
-
-    getMineField(): PIXI.Container {
+    private getMineField(): PIXI.Container {
         const container = new PIXI.Container();
 
         const cell1 = new PIXI.Sprite(PIXI.Texture.from("cellOpen1.png"));
@@ -324,5 +265,19 @@ export class AppComponent implements OnInit {
         container.addChild(cellOpen);
 
         return container;
+    }
+
+    private resizeCanvas(): void {
+        const resize = () => {
+            if (this.Application) {
+                //this.app.renderer.resize(window.innerWidth, window.innerHeight);
+            }
+            //app.stage.scale.x = window.innerWidth / gameWidth;
+            //app.stage.scale.y = window.innerHeight / gameHeight;
+        };
+
+        resize();
+
+        window.addEventListener("resize", resize);
     }
 }

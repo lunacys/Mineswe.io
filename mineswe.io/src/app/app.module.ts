@@ -2,7 +2,7 @@ import { LOCALE_ID, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 
 import { AppRoutingModule } from "./app-routing.module";
-import { AppComponent } from "./components/app.component";
+import { AppComponent } from "./app.component";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { AppInitializer } from "./shared/app-initializer";
 import { interceptors } from "./app.interceptors";
@@ -10,14 +10,18 @@ import { ENVIRONMENT } from "./services/environment.service";
 import { environment } from "../environments/environment";
 import { LogFactoryService } from "./services/log-factory.service";
 import { LocalStorageService } from "./services/local-storage.service";
+import { SignInFormComponent } from './components/sign-in-form/sign-in-form.component';
+import { FormsModule } from "@angular/forms";
+import { GameComponent } from './components/game/game.component';
 
 @NgModule({
-	declarations: [AppComponent],
-	imports: [
-		BrowserModule,
-		AppRoutingModule,
-		HttpClientModule
-	],
+	declarations: [AppComponent, SignInFormComponent, GameComponent],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        FormsModule
+    ],
 	providers: [
 	    HttpClient,
         LogFactoryService,

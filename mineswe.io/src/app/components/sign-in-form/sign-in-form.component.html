@@ -1,0 +1,19 @@
+<div class="error-message-panel" [hidden]="!ErrorMessage">
+    <span class="error-message">{{ErrorMessage}}</span>
+</div>
+
+<form *ngIf="!IsAuthed">
+    <label for="username-input">Username</label>
+    <input name="username" id="username-input" [(ngModel)]="username">
+    <label for="password-input">Password</label>
+    <input name="password" id="password-input" type="password" [(ngModel)]="password">
+    <button type="submit" (click)="onLoginClick($event)">Login</button>
+</form>
+
+<div *ngIf="IsAuthed">
+    <button (click)="onSignOutClick($event)">Sign Out</button>
+</div>
+
+<div>
+    <button (click)="onGetAllUsersClick($event)">Get All Users</button>
+</div>

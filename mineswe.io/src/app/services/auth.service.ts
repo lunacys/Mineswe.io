@@ -1,10 +1,10 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { AppConfig } from "../shared/app-config";
 import { Subscription } from "rxjs";
-import { tap } from "rxjs/operators";
 import { UserService } from "./user.service";
 import { LocalStorageService } from "./local-storage.service";
+import { LogFactoryService } from "./log-factory.service";
+import { ILogger } from "../shared/logging/logger-interface";
 
 export interface UserData {
     id: number;
@@ -15,6 +15,11 @@ export interface UserData {
         id: number;
         roleName: string;
     };
+}
+
+export interface Credentials {
+    username: string;
+    password: string;
 }
 
 export type AuthType = "none" | "asUser" | "asGuest";
@@ -30,6 +35,8 @@ export class AuthService {
     private _onAuthChanged: EventEmitter<AuthType> = new EventEmitter<AuthType>();
     private _token: string | null = null;
 
+    private readonly _logger: ILogger;
+
     public get isSignedIn(): boolean {
         return this._isSignedIn;
     }
@@ -42,45 +49,57 @@ export class AuthService {
         return this._onAuthChanged.subscribe(callback);
     }
 
-    constructor(private http: HttpClient, private userService: UserService, private localStorageService: LocalStorageService) {
+    constructor(private http: HttpClient,
+                private userService: UserService,
+                private localStorageService: LocalStorageService,
+                private logFactory: LogFactoryService) {
         this._httpOptions = {
             headers: new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded"),
         };
+
+        this._logger = logFactory.getLogger("AuthService");
     }
 
-    public async auth(username: string, password: string): Promise<UserData> {
+    public async auth(credentials: Credentials): Promise<UserData> {
+        this._logger.logDebug("Authing");
+
+        let result: UserData | null = null;
+
+        try {
+            result = await this.http
+                .post<UserData>("/auth", this.createBody(credentials.username, credentials.password))
+                .toPromise();
+        } catch (ex) {
+            throw new Error(this.getErrorMessage(ex));
+        }
+
+        if (result === null) {
+            throw new Error("Invalid response data");
+        }
+
+        this.localStorageService.updateUser(result.username, result.token);
+        this._token = result.token;
+        this.authAsUser();
+
+        return result;
+    }
+
+    public async tryAuthByToken(): Promise<UserData | null> {
         const existingUser = this.localStorageService.getUser();
-        if (existingUser !== null) {
-            try {
-                this._token = existingUser.token;
-                this.authAsUser();
-                return this.userService.getUserData();
-            } catch (ex) {
-                throw new Error(this.getErrorMessage(ex));
-            }
-        } else {
-            let result: UserData | null = null;
+        if (existingUser === null) {
+            return null;
+        }
 
-            try {
-                result = await this.http
-                    .post<UserData>("/auth", this.createBody(username, password))
-                    .toPromise();
-            } catch (ex) {
-                throw new Error(this.getErrorMessage(ex));
-            }
+        this._logger.logDebug("Found username and token, using it for auth");
 
-            if (result === null) {
-                throw new Error("Invalid response data");
-            }
-
-            this.localStorageService.updateUser(result.username, result.token);
-            this._token = result.token;
+        try {
+            this._token = existingUser.token;
             this.authAsUser();
-
-            return result;
+            return await this.userService.getUserData();
+        } catch (ex) {
+            throw new Error(ex.error.message);
         }
     }
-
 
     public authAsGuest(): void {
         this._isSignedIn = true;
@@ -96,6 +115,7 @@ export class AuthService {
 
     public signOut(): void {
         this.localStorageService.updateUser(null, null);
+        this._token = null;
         this._isSignedIn = false;
         this._authType = "none";
         this._onAuthChanged.emit(this._authType);
@@ -108,7 +128,6 @@ export class AuthService {
 
         return body.toString();
     }
-
     private getErrorMessage(ex: any): string {
         if (ex && ex.error && ex.error.message) {
             return ex.error.message;
