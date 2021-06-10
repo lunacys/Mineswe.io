@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Mineswe.io.WebApi.Models;
 
 namespace Mineswe.io.WebApi.Services.Authentication
@@ -18,7 +19,17 @@ namespace Mineswe.io.WebApi.Services.Authentication
 
         public async Task<AuthResponse> AuthAsync(AuthRequest request)
         {
-            var user = await _userService.GetByUsernameAsync(request.Username);
+            User user = null;
+
+            try
+            {
+                user = await _userService.GetByUsernameAsync(request.Username);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            
 
             if (user == null)
                 return null;

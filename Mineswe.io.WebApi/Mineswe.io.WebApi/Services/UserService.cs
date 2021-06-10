@@ -112,7 +112,7 @@ namespace Mineswe.io.WebApi.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<User> UpdateAsync(User user)
+        public Task<User> UpdateAsync(User user)
         {
             throw new System.NotImplementedException();
         }
