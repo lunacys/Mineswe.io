@@ -24,6 +24,7 @@ using Microsoft.OpenApi.Models;
 using Mineswe.io.WebApi.Configurations;
 using Mineswe.io.WebApi.Configurations.SwaggerFilters;
 using Mineswe.io.WebApi.Data;
+using Mineswe.io.WebApi.Hubs;
 using Mineswe.io.WebApi.Services;
 using Mineswe.io.WebApi.Services.Authentication;
 
@@ -74,6 +75,12 @@ namespace Mineswe.io.WebApi
                         .AllowCredentials();
                 });
             });
+
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
             services.AddControllersWithViews().AddNewtonsoftJson();
             //services.AddControllers().AddNewtonsoftJson();
 
@@ -169,7 +176,7 @@ namespace Mineswe.io.WebApi
             {
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
-                
+                endpoints.MapHub<TestHub>("/testHub");
             });
 
             /*app.Run(context =>
