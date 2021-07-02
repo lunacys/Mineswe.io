@@ -97,6 +97,7 @@ export class AuthService {
             this.authAsUser();
             return await this.userService.getUserData();
         } catch (ex) {
+            this.signOut();
             throw new Error(ex.error.message);
         }
     }

@@ -3,13 +3,7 @@ import { LogFactoryService } from "./services/log-factory.service";
 import { ILogger } from "./shared/logging/logger-interface";
 import * as SignalR from "@microsoft/signalr";
 import { AuthService } from "./services/auth.service";
-
-export interface WeatherData {
-    date: Date;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+import * as tree234 from "../assets/tree234.js";
 
 @Component({
     selector: "app-root",
@@ -30,13 +24,5 @@ export class AppComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         await this.authService.tryAuthByToken();
-
-        const connection = new SignalR.HubConnectionBuilder()
-            .withUrl("https://localhost:44328/testHub")
-            .build();
-
-        await connection.start();
-
-        await connection.invoke("TestMethod", "hello");
     }
 }

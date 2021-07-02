@@ -1,5 +1,19 @@
-*, html, body {
-  margin: 0;
+*, html, body, app-game {
+    margin: 0;
+}
+
+html, body {
+    overflow: hidden;
+}
+
+.canvas-holder {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.absolute {
+    position: absolute;
 }
 
 .error-message-panel {
@@ -8,4 +22,19 @@
     text-align: center;
     background: red;
     color: black;
+}
+
+.sign-in-form-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background: white;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+
+    * {
+        margin: 2px;
+    }
 }

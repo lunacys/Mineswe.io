@@ -13,9 +13,10 @@ import { LocalStorageService } from "./services/local-storage.service";
 import { SignInFormComponent } from './components/sign-in-form/sign-in-form.component';
 import { FormsModule } from "@angular/forms";
 import { GameComponent } from './components/game/game.component';
+import { InputHandlerComponent } from './components/input-handler-component/input-handler.component';
 
 @NgModule({
-	declarations: [AppComponent, SignInFormComponent, GameComponent],
+	declarations: [AppComponent, SignInFormComponent, GameComponent, InputHandlerComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,

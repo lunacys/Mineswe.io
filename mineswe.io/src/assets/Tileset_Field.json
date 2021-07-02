@@ -1,6 +1,6 @@
 {
     "frames": {
-        "cellOpenEmpty.png": {
+        "cellOpen0.png": {
             "frame": { "x": 0, "y": 0, "w": 100, "h": 100 },
             "spriteSourceSize": { "x": 0, "y": 0, "w": 100, "h": 100 },
             "sourceSize": { "w": 100, "h": 100 }

@@ -3,6 +3,7 @@ import { AuthService } from "../../services/auth.service";
 import { UserService } from "../../services/user.service";
 import { ILogger } from "../../shared/logging/logger-interface";
 import { LogFactoryService } from "../../services/log-factory.service";
+import * as SignalR from "@microsoft/signalr";
 
 @Component({
     selector: "app-sign-in-form",
@@ -60,5 +61,21 @@ export class SignInFormComponent implements OnInit {
             this._logger.logError("Error while getting all users: ", ex);
             this.ErrorMessage = ex.error.message;
         }
+    }
+
+    public async onConnectSignalRClick($event: MouseEvent): Promise<void> {
+        const connection = new SignalR.HubConnectionBuilder()
+            .withUrl("https://localhost:44328/testHub", {
+                accessTokenFactory: () => this.authService.token || ""
+            })
+            .build();
+
+        await connection.start();
+
+        await connection.invoke("TestMethod", "hello");
+
+        connection.on("testMethodClient", (args) => {
+           console.log("Got message from SignalR server with args: ", args);
+        });
     }
 }

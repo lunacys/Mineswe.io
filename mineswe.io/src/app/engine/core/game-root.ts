@@ -1,11 +1,14 @@
 import * as PIXI from "pixi.js";
-import { ILogger } from "../shared/logging/logger-interface";
-import { LoggerFactory } from "../shared/logging/logger-factory";
+import { ILogger } from "../../shared/logging/logger-interface";
+import { LoggerFactory } from "../../shared/logging/logger-factory";
 import { Color } from "./color";
+import { MineFieldRenderer } from "../mine-field-renderer";
+import { FieldCell } from "../field-cell";
+import { IInputHandler } from "./input-handler-interface";
 
 export class GameRoot {
-    public Application: PIXI.Application;
-    public Stage: PIXI.Container;
+    private Application: PIXI.Application;
+    private Stage: PIXI.Container;
     public get Width(): number {
         return this._width;
     }
@@ -16,11 +19,20 @@ export class GameRoot {
         return this._totalTime;
     }
 
+    public get InputHandler(): IInputHandler | null {
+        return this._inputHandler;
+    }
+    public set InputHandler(value: IInputHandler | null) {
+        this._inputHandler = value;
+    }
+
     protected logger: ILogger;
 
     private _width: number;
     private _height: number;
     private _totalTime: number = 0;
+
+    private _inputHandler: IInputHandler | null = null;
 
     constructor(width: number = 800, height: number = 600) {
         this._width = width;
@@ -32,16 +44,18 @@ export class GameRoot {
             height: this.Height,
             antialias: true,
             autoDensity: true,
-            resolution: window.devicePixelRatio,
+            resolution: window.devicePixelRatio
         });
         this.Stage = this.Application.stage;
 
         this.logger = LoggerFactory.getLogger("GameRoot");
     }
 
-    public async run(): Promise<void> {
+    public async run(callback?: (view: HTMLCanvasElement) => void): Promise<void> {
         await this.initialize();
-
+        if (callback) {
+            callback(this.Application.view);
+        }
     }
 
     protected async initialize(): Promise<void> {
@@ -90,14 +104,39 @@ export class GameRoot {
 
         this.Stage.addChild(mineField);
 
+        const field = new MineFieldRenderer({
+            Width: 32,
+            Height: 16,
+            getCellAt: (x: number, y: number): FieldCell => {
+                return new FieldCell();
+            }
+        });
+
+
+
+        const container = field.renderToContainer();
+        container.scale.set(0.25, 0.25);
+        container.position.set(400, 300);
+        container.interactive = true;
+        container.on("click", () => {
+            console.log("clicked on cumtainer");
+        })
+        this.Stage.addChild(container);
+
         window.addEventListener("wheel", ($event) => {
             if ($event.deltaY < 0 && mineField.scale.x < 3.0) {
                 mineField.scale.x += 0.25;
                 mineField.scale.y += 0.25;
+
+                container.scale.x += 0.25;
+                container.scale.y += 0.25;
             }
             if ($event.deltaY > 0 && mineField.scale.x > 0.25) {
                 mineField.scale.x -= 0.25;
                 mineField.scale.y -= 0.25;
+
+                container.scale.x -= 0.25;
+                container.scale.y -= 0.25;
             }
         });
 
@@ -218,13 +257,9 @@ export class GameRoot {
         }
     }
 
-    protected update(dt: number): void {
+    protected update(dt: number): void {}
 
-    }
-
-    protected render(renderer: PIXI.Renderer): void {
-
-    }
+    protected render(renderer: PIXI.Renderer): void {}
 
     private loadAssets(): Promise<void> {
         return new Promise((res, rej) => {
@@ -270,10 +305,10 @@ export class GameRoot {
     private resizeCanvas(): void {
         const resize = () => {
             if (this.Application) {
-                //this.app.renderer.resize(window.innerWidth, window.innerHeight);
+                this.Application.renderer.resize(window.innerWidth, window.innerHeight);
             }
-            //app.stage.scale.x = window.innerWidth / gameWidth;
-            //app.stage.scale.y = window.innerHeight / gameHeight;
+            //this.Application.stage.scale.x = window.innerWidth / this.Width;
+            //this.Application.stage.scale.y = window.innerHeight / this.Height;
         };
 
         resize();

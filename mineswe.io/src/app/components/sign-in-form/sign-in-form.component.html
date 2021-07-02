@@ -1,19 +1,32 @@
-<div class="error-message-panel" [hidden]="!ErrorMessage">
-    <span class="error-message">{{ErrorMessage}}</span>
-</div>
+<div class="sign-in-form-container">
+    <div class="error-message-panel" [hidden]="!ErrorMessage">
+        <span class="error-message">{{ErrorMessage}}</span>
+    </div>
 
-<form *ngIf="!IsAuthed">
-    <label for="username-input">Username</label>
-    <input name="username" id="username-input" [(ngModel)]="username">
-    <label for="password-input">Password</label>
-    <input name="password" id="password-input" type="password" [(ngModel)]="password">
-    <button type="submit" (click)="onLoginClick($event)">Login</button>
-</form>
+    <form *ngIf="!IsAuthed">
+        <div>
+            <label for="username-input" style="display: inline-block; width: 80px">Username</label>
+            <input name="username" id="username-input" [(ngModel)]="username">
+        </div>
+        <div>
+            <label for="password-input" style="display: inline-block; width: 80px">Password</label>
+            <input name="password" id="password-input" type="password" [(ngModel)]="password">
+        </div>
 
-<div *ngIf="IsAuthed">
-    <button (click)="onSignOutClick($event)">Sign Out</button>
-</div>
+        <button type="submit" (click)="onLoginClick($event)">Login</button>
+    </form>
 
-<div>
-    <button (click)="onGetAllUsersClick($event)">Get All Users</button>
+    <hr>
+
+    <div *ngIf="IsAuthed">
+        <button (click)="onSignOutClick($event)">Sign Out</button>
+    </div>
+
+    <div>
+        <button (click)="onGetAllUsersClick($event)">Get All Users</button>
+    </div>
+
+    <div>
+        <button (click)="onConnectSignalRClick($event)">Connect SignalR</button>
+    </div>
 </div>
